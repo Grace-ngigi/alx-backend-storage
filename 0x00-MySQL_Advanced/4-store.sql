@@ -6,8 +6,7 @@ DELIMITER $$
 
 USE `holberton`$$
 
-CREATE DEFINER=`root`@`localhost`
-TRIGGER decr_items 
+CREATE TRIGGER decr_items 
 AFTER INSERT ON `holberton`.`orders`
 FOR EACH ROW
 	BEGIN
