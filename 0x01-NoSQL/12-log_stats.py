@@ -5,8 +5,8 @@ import pymongo
 
 def nginx_stats(mongo_collection):
     ''' get nginx stats '''
-    total count = mongo_collection.count_document({})
-    print(f"Total logs: {total_logs}")
+    total_count = mongo_collection.count_document({})
+    print(f"Total logs: {total_count}")
 
     methods = ["GET", "POST", "PUT", "PATCH", "DELETE"]
     print("Methods:")
