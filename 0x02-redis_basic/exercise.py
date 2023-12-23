@@ -42,6 +42,20 @@ class Cache:
             value = fn(value)
         return value
 
+    def get_str(self, key: str) -> str:
+        ''' Get string from cache '''
+        value = self._redis.get(key)
+        return value.decode('utf-8')
+
+    def get_int(self, key: str) -> int:
+        '''Get int from cache '''
+        value = self._redis.get(key)
+        try:
+            value = int(value.decode('utf-8'))
+        except Exception:
+            value = 0
+        return value
+
 
 def call_history(method: Callable) -> Callable:
     ''' Store history '''
@@ -58,3 +72,16 @@ def call_history(method: Callable) -> Callable:
         return data
 
     return wrapper
+
+
+def replay(method: Callable) -> None:
+    ''' Replay history function '''
+    name = method.__qualname__
+    cache = redis.Redis()
+    calls = cache.get(name).decode("utf-8")
+    print("{} was called {} times:".format(name, calls))
+    inputs = cache.lrange(name + ":inputs", 0, -1)
+    outputs = cache.lrange(name + ":outputs", 0, -1)
+    for i, o in zip(inputs, outputs):
+        print("{}(*{}) -> {}".format(name, i.decode('utf-8'),
+                                     o.decode('utf-8')))
