@@ -26,6 +26,7 @@ class Cache:
         self._redis.flushdb()
 
     @count_calls
+    @call_history
     def store(self, data: Union[str, bytes, int, float]) -> str:
         ''' Store data in cache '''
         uniqueKey = str(uuid4())
@@ -40,3 +41,20 @@ class Cache:
         if fn:
             value = fn(value)
         return value
+
+
+def call_history(method: Callable) -> Callable:
+    ''' Store history '''
+    key = method.__qualname__
+    inputs = key + ":inputs"
+    outputs = key + ":outputs"
+
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        ''' Wrapper function '''
+        self._redis.rpush(inputs, str(args))
+        data = method(self, *args, **kwargs)
+        self._redis.rpush(outputs, str(data))
+        return data
+
+    return wrapper
